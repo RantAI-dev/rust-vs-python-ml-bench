@@ -1,0 +1,63 @@
+{
+  "framework": "pytorch",
+  "language": "python",
+  "task_type": "deep_learning",
+  "model_name": "simple_cnn_cnn",
+  "dataset": "synthetic",
+  "run_id": "pycnn",
+  "timestamp": "2025-08-24T12:01:24.623778",
+  "hardware_config": {
+    "cpu_model": "x86_64",
+    "cpu_cores": 16,
+    "cpu_threads": 16,
+    "memory_gb": 11.386894226074219,
+    "gpu_model": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "gpu_memory_gb": 6.0,
+    "storage_type": "NVMe SSD",
+    "storage_capacity_gb": 1000.0
+  },
+  "performance_metrics": {
+    "training_time_seconds": 1.2680986059999668,
+    "inference_latency_ms": null,
+    "throughput_samples_per_second": null,
+    "convergence_epochs": 1,
+    "tokens_per_second": null,
+    "latency_p50_ms": null,
+    "latency_p95_ms": null,
+    "latency_p99_ms": null
+  },
+  "resource_metrics": {
+    "peak_memory_mb": 384.65234375,
+    "average_memory_mb": 355.080078125,
+    "peak_gpu_memory_mb": 19.0,
+    "average_gpu_memory_mb": 19.0,
+    "cpu_utilization_percent": 25.150000000000002,
+    "gpu_utilization_percent": 0.0,
+    "energy_consumption_joules": null,
+    "network_io_mb": null
+  },
+  "quality_metrics": {
+    "accuracy": 11.0,
+    "loss": 2.299455029623849,
+    "f1_score": 0.030054719562243502,
+    "precision": 0.01975,
+    "recall": 0.11,
+    "rmse": null,
+    "mae": null,
+    "r2_score": null,
+    "perplexity": null,
+    "episode_reward": null,
+    "convergence_steps": null
+  },
+  "metadata": {
+    "architecture": "simple_cnn",
+    "hyperparameters": {
+      "epochs": 1,
+      "batch_size": 32,
+      "n_channels": 1
+    },
+    "dataset_size": 1000,
+    "final_loss": 2.3207767382264137,
+    "final_accuracy": 10.3
+  }
+}

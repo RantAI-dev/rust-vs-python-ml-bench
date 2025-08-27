@@ -1,0 +1,69 @@
+{
+  "framework": "transformers",
+  "language": "python",
+  "task_type": "llm",
+  "model_name": "distilgpt2_text-generation",
+  "dataset": "custom",
+  "run_id": "pyllm",
+  "timestamp": "2025-08-24T12:10:08.919114",
+  "hardware_config": {
+    "cpu_model": "x86_64",
+    "cpu_cores": 16,
+    "cpu_threads": 16,
+    "memory_gb": 11.386894226074219,
+    "gpu_model": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "gpu_memory_gb": 6.0,
+    "storage_type": "NVMe SSD",
+    "storage_capacity_gb": 1000.0
+  },
+  "performance_metrics": {
+    "training_time_seconds": null,
+    "inference_latency_ms": 1874.706430320084,
+    "throughput_samples_per_second": 0.5334168506741942,
+    "convergence_epochs": null,
+    "tokens_per_second": 44.807015456632314,
+    "latency_p50_ms": null,
+    "latency_p95_ms": null,
+    "latency_p99_ms": null
+  },
+  "resource_metrics": {
+    "peak_memory_mb": 0.0,
+    "average_memory_mb": 0.0,
+    "peak_gpu_memory_mb": 0.0,
+    "average_gpu_memory_mb": 0.0,
+    "cpu_utilization_percent": 0.0,
+    "gpu_utilization_percent": null,
+    "energy_consumption_joules": null,
+    "network_io_mb": null
+  },
+  "quality_metrics": {
+    "accuracy": null,
+    "loss": null,
+    "f1_score": null,
+    "precision": null,
+    "recall": null,
+    "rmse": null,
+    "mae": null,
+    "r2_score": null,
+    "perplexity": null,
+    "episode_reward": null,
+    "convergence_steps": null
+  },
+  "metadata": {
+    "model_name": "distilgpt2",
+    "task": "text-generation",
+    "hyperparameters": {
+      "batch_sizes": [
+        1
+      ],
+      "sequence_lengths": [
+        64
+      ],
+      "prompts": [
+        "Hello world!"
+      ]
+    },
+    "total_parameters": 81912576,
+    "avg_tokens_per_sample": 84.0
+  }
+}
