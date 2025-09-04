@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-tch = "0.14"
+tch = { version = "0.20", features = ["download-libtorch"] }
 ndarray = "0.15"
 ndarray-rand = "0.14"
 rand = "0.8"

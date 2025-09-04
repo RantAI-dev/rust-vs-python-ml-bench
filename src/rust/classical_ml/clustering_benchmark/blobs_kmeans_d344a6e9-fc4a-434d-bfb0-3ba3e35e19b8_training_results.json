@@ -1,0 +1,53 @@
+{
+  "framework": "linfa",
+  "language": "rust",
+  "task_type": "classical_ml",
+  "model_name": "kmeans_clustering",
+  "dataset": "blobs",
+  "run_id": "d344a6e9-fc4a-434d-bfb0-3ba3e35e19b8",
+  "timestamp": "2025-09-03T13:21:21.236608751Z",
+  "hardware_config": {
+    "cpu_model": "Unknown",
+    "cpu_cores": 16,
+    "cpu_threads": 16,
+    "memory_gb": 11.386898040771484,
+    "gpu_model": null,
+    "gpu_memory_gb": null
+  },
+  "performance_metrics": {
+    "training_time_seconds": 0.238550548,
+    "inference_latency_ms": null,
+    "throughput_samples_per_second": null,
+    "latency_p50_ms": null,
+    "latency_p95_ms": null,
+    "latency_p99_ms": null,
+    "tokens_per_second": null,
+    "convergence_epochs": null
+  },
+  "resource_metrics": {
+    "peak_memory_mb": 18.08203125,
+    "average_memory_mb": 17.64453125,
+    "cpu_utilization_percent": 2.8658578395843506,
+    "peak_gpu_memory_mb": null,
+    "average_gpu_memory_mb": null,
+    "gpu_utilization_percent": null
+  },
+  "quality_metrics": {
+    "accuracy": null,
+    "f1_score": null,
+    "precision": null,
+    "recall": null,
+    "loss": null,
+    "rmse": null,
+    "mae": null,
+    "r2_score": null,
+    "silhouette_score": 0.7382911982499275,
+    "inertia": 188.9067469005074
+  },
+  "metadata": {
+    "dataset_size": 300,
+    "hyperparameters": {},
+    "algorithm": "kmeans",
+    "features": 2
+  }
+}

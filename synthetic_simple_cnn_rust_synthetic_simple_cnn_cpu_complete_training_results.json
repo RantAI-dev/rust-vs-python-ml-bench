@@ -1,0 +1,53 @@
+{
+  "framework": "tch",
+  "language": "rust",
+  "task_type": "deep_learning",
+  "model_name": "simple_cnn_cnn",
+  "dataset": "synthetic",
+  "run_id": "rust_synthetic_simple_cnn_cpu_complete",
+  "timestamp": "2025-09-03T18:10:23.485001127Z",
+  "hardware_config": {
+    "cpu_model": "Unknown",
+    "cpu_cores": 16,
+    "cpu_threads": 16,
+    "memory_gb": 11.386898040771484,
+    "gpu_model": null,
+    "gpu_memory_gb": null
+  },
+  "performance_metrics": {
+    "training_time_seconds": 10.12747195,
+    "inference_latency_ms": null,
+    "throughput_samples_per_second": null,
+    "latency_p50_ms": null,
+    "latency_p95_ms": null,
+    "latency_p99_ms": null,
+    "tokens_per_second": null,
+    "convergence_epochs": 10
+  },
+  "resource_metrics": {
+    "peak_memory_mb": 526.0625,
+    "average_memory_mb": 443.54296875,
+    "cpu_utilization_percent": 4.256363868713379,
+    "peak_gpu_memory_mb": null,
+    "average_gpu_memory_mb": null,
+    "gpu_utilization_percent": null
+  },
+  "quality_metrics": {
+    "accuracy": 0.155,
+    "f1_score": null,
+    "precision": null,
+    "recall": null,
+    "loss": 3.091092109680176,
+    "rmse": null,
+    "mae": null,
+    "r2_score": null
+  },
+  "metadata": {
+    "hyperparameters": {},
+    "device": "Cpu",
+    "learning_rate": 0.001,
+    "architecture": "simple_cnn",
+    "epochs": 10,
+    "dataset_size": 1000
+  }
+}

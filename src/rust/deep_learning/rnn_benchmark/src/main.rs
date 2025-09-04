@@ -12,7 +12,7 @@ use rand::rngs::StdRng;
 use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
-use sysinfo::{System, SystemExt, CpuExt};
+use sysinfo::{System, SystemExt, CpuExt, ProcessExt, PidExt};
 use anyhow::Result;
 
 #[derive(Parser, Debug)]
@@ -157,6 +157,7 @@ struct RNNBenchmark {
     framework: String,
     device: Device,
     model: Option<Box<dyn RNNModel>>,
+    vs: nn::VarStore,
     resource_monitor: ResourceMonitor,
 }
 
@@ -203,6 +204,7 @@ impl RNNBenchmark {
             framework,
             device,
             model: None,
+            vs: nn::VarStore::new(device),
             resource_monitor: ResourceMonitor::new(),
         }
     }
@@ -321,16 +323,14 @@ impl RNNBenchmark {
     }
     
     fn create_model(&mut self, architecture: &str, hyperparams: &HashMap<String, f64>) -> Result<()> {
-        let vs = nn::VarStore::new(self.device);
-        
         let input_size = hyperparams.get("input_size").unwrap_or(&10.0) as i64;
         let hidden_size = hyperparams.get("hidden_size").unwrap_or(&64.0) as i64;
         let num_layers = hyperparams.get("num_layers").unwrap_or(&2.0) as i64;
         let num_classes = hyperparams.get("num_classes").unwrap_or(&3.0) as i64;
         
         let model: Box<dyn RNNModel> = match architecture {
-            "lstm" => Box::new(SimpleRNN::new(&vs.root(), input_size, hidden_size, num_layers, num_classes)),
-            "gru" => Box::new(GRUModel::new(&vs.root(), input_size, hidden_size, num_layers, num_classes)),
+            "lstm" => Box::new(SimpleRNN::new(&self.vs.root(), input_size, hidden_size, num_layers, num_classes)),
+            "gru" => Box::new(GRUModel::new(&self.vs.root(), input_size, hidden_size, num_layers, num_classes)),
             _ => return Err(anyhow::anyhow!("Unknown architecture: {}", architecture)),
         };
         
@@ -347,8 +347,8 @@ impl RNNBenchmark {
         
         let start_time = Instant::now();
         
-        // Create optimizer
-        let mut opt = nn::Adam::default().build(&nn::VarStore::new(self.device), learning_rate)?;
+        // Create optimizer bound to the same VarStore as the model
+        let mut opt = nn::Adam::default().build(&self.vs, learning_rate)?;
         
         let mut losses = Vec::new();
         
@@ -606,6 +606,7 @@ struct ResourceMonitor {
     memory_samples: Vec<u64>,
     cpu_samples: Vec<f32>,
     start_time: Option<Instant>,
+    process_id: u32,
 }
 
 impl ResourceMonitor {
@@ -616,6 +617,7 @@ impl ResourceMonitor {
             memory_samples: Vec::new(),
             cpu_samples: Vec::new(),
             start_time: None,
+            process_id: std::process::id(),
         }
     }
     
@@ -624,9 +626,17 @@ impl ResourceMonitor {
         sys.refresh_all();
         
         self.start_time = Some(Instant::now());
-        self.start_memory = Some(sys.used_memory());
-        self.peak_memory = sys.used_memory();
-        self.memory_samples = vec![sys.used_memory()];
+        
+        // Get process-specific memory usage instead of system-wide
+        let process_memory = if let Some(process) = sys.process(sysinfo::Pid::from_u32(self.process_id)) {
+            process.memory()
+        } else {
+            0
+        };
+        
+        self.start_memory = Some(process_memory);
+        self.peak_memory = process_memory;
+        self.memory_samples = vec![process_memory];
         self.cpu_samples = vec![sys.global_cpu_info().cpu_usage()];
     }
     
@@ -634,7 +644,12 @@ impl ResourceMonitor {
         let mut sys = System::new_all();
         sys.refresh_all();
         
-        let final_memory = sys.used_memory();
+        // Get final process-specific memory usage
+        let final_memory = if let Some(process) = sys.process(sysinfo::Pid::from_u32(self.process_id)) {
+            process.memory()
+        } else {
+            0
+        };
         let final_cpu = sys.global_cpu_info().cpu_usage();
         
         self.memory_samples.push(final_memory);

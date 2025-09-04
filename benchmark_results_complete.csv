@@ -1,0 +1,15 @@
+Language,Dataset,Architecture,Device,Training_Time_s,Peak_Memory_MB,Accuracy_%,GPU_Memory_MB,CPU_Usage_%,Final_Loss,Run_ID
+Python,Synthetic,simple_cnn,Unknown,5.964310963998287,2986.62109375,1100.0,96.56591796875,7.0,2.2976175376347134,python_synthetic_simple_cnn_gpu_complete
+Rust,Mnist,simple_cnn,GPU,0.63231699,815.578125,10.5,0.0,11.41049861907959,3.0475478172302246,rust_mnist_simple_cnn_gpu_complete
+Rust,Synthetic,simple_cnn,GPU,0.989529068,814.20703125,6.0,0.0,4.24652099609375,3.319821834564209,rust_synthetic_simple_cnn_gpu_complete
+Rust,Cifar10,resnet18,GPU,0.597169368,848.14453125,10.0,0.0,11.36202621459961,2.397726058959961,rust_cifar10_resnet18_gpu_complete
+Rust,Cifar10,resnet18,CPU,41.335815417,488.0703125,9.5,0.0,11.388143539428711,2.3562557697296143,rust_cifar10_resnet18_cpu_complete
+Python,Cifar10,resnet18,Unknown,306.74997724700006,2874.6953125,7791.0,367.41455078125,5.3,0.7669086521997238,python_cifar10_resnet18_gpu_complete
+Rust,Synthetic,simple_cnn,CPU,10.12747195,526.0625,15.5,0.0,4.256363868713379,3.091092109680176,rust_synthetic_simple_cnn_cpu_complete
+Python,Mnist,simple_cnn,Unknown,169.34645957499743,2581.60546875,9922.0,90.32421875,12.55,0.024680808722586663,python_mnist_simple_cnn_gpu_complete
+Python,Cifar10,resnet18,Unknown,5684.041017660002,784.5625,7765.000000000001,0.0,29.35,0.7803566705304593,python_cifar10_resnet18_cpu_complete
+Python,Synthetic,simple_cnn,Unknown,10.756857279000542,400.46484375,1150.0,0.0,33.75,2.2978169236864363,python_synthetic_simple_cnn_cpu_complete
+Rust,Mnist,lenet,GPU,0.463304135,834.91796875,10.5,0.0,11.413398742675781,2.456397771835327,rust_mnist_lenet_gpu_complete
+Python,Synthetic,resnet18,Unknown,8.607024111999635,2643.609375,700.0,367.41455078125,6.05,2.433088949748448,python_synthetic_resnet18_gpu_complete
+Rust,Cifar100,resnet18,GPU,0.668765773,831.12109375,1.5,0.0,11.404788970947266,4.772566318511963,rust_cifar100_resnet18_gpu_complete
+Python,Mnist,lenet,Unknown,159.9164327019971,2611.48828125,9939.0,76.41748046875,16.0,0.02387246537951771,python_mnist_lenet_gpu_complete

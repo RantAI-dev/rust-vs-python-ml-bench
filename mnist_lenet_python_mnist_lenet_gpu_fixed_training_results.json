@@ -1,0 +1,59 @@
+{
+  "framework": "pytorch",
+  "language": "python",
+  "task_type": "deep_learning",
+  "model_name": "lenet_cnn",
+  "dataset": "mnist",
+  "run_id": "python_mnist_lenet_gpu_fixed",
+  "timestamp": "2025-09-04T01:53:16.547645",
+  "hardware_config": {
+    "cpu_model": "x86_64",
+    "cpu_cores": 16,
+    "cpu_threads": 16,
+    "memory_gb": 11.386898040771484,
+    "gpu_model": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "gpu_memory_gb": 5.99951171875,
+    "storage_type": "NVMe SSD",
+    "storage_capacity_gb": 1000.0
+  },
+  "performance_metrics": {
+    "training_time_seconds": 171.14777502699872,
+    "inference_latency_ms": null,
+    "throughput_samples_per_second": null,
+    "convergence_epochs": 10,
+    "tokens_per_second": null,
+    "latency_p50_ms": null,
+    "latency_p95_ms": null,
+    "latency_p99_ms": null
+  },
+  "resource_metrics": {
+    "peak_memory_mb": 2634.796875,
+    "average_memory_mb": 1964.740234375,
+    "peak_gpu_memory_mb": 76.41748046875,
+    "average_gpu_memory_mb": 65.05859375,
+    "cpu_utilization_percent": 6.1,
+    "gpu_utilization_percent": null,
+    "energy_consumption_joules": null,
+    "network_io_mb": null
+  },
+  "quality_metrics": {
+    "accuracy": 99.39,
+    "loss": 0.02387246537951771,
+    "f1_score": 0.9938964386922331,
+    "precision": 0.9939064032896334,
+    "recall": 0.9939,
+    "rmse": null,
+    "mae": null,
+    "r2_score": null,
+    "perplexity": null,
+    "episode_reward": null,
+    "convergence_steps": null
+  },
+  "metadata": {
+    "architecture": "lenet",
+    "hyperparameters": {},
+    "dataset_size": 60000,
+    "final_loss": 0.010931607306592681,
+    "final_accuracy": 99.70333333333333
+  }
+}

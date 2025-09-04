@@ -1,0 +1,61 @@
+{
+  "framework": "scikit-learn",
+  "language": "python",
+  "task_type": "classical_ml",
+  "model_name": "svc_svm",
+  "dataset": "wine",
+  "run_id": "python_wine_svm_test",
+  "timestamp": "2025-09-03T13:24:06.714244",
+  "hardware_config": {
+    "cpu_model": "x86_64",
+    "cpu_cores": 16,
+    "cpu_threads": 16,
+    "memory_gb": 11.386898040771484,
+    "gpu_model": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "gpu_memory_gb": 6.0,
+    "storage_type": "NVMe SSD",
+    "storage_capacity_gb": 1000.0
+  },
+  "performance_metrics": {
+    "training_time_seconds": 0.003177010999934282,
+    "inference_latency_ms": null,
+    "throughput_samples_per_second": null,
+    "convergence_epochs": null,
+    "tokens_per_second": null,
+    "latency_p50_ms": null,
+    "latency_p95_ms": null,
+    "latency_p99_ms": null
+  },
+  "resource_metrics": {
+    "peak_memory_mb": 153.80859375,
+    "average_memory_mb": 153.55859375,
+    "peak_gpu_memory_mb": 0.0,
+    "average_gpu_memory_mb": 0.0,
+    "cpu_utilization_percent": 5.9,
+    "gpu_utilization_percent": 0.0,
+    "energy_consumption_joules": null,
+    "network_io_mb": null
+  },
+  "quality_metrics": {
+    "accuracy": 0.9722222222222222,
+    "loss": null,
+    "f1_score": 0.9719701552732407,
+    "precision": 0.974074074074074,
+    "recall": 0.9722222222222222,
+    "rmse": null,
+    "mae": null,
+    "r2_score": null,
+    "perplexity": null,
+    "episode_reward": null,
+    "convergence_steps": null
+  },
+  "metadata": {
+    "algorithm": "svc",
+    "hyperparameters": {},
+    "dataset_size": 178,
+    "n_support_vectors": 62,
+    "n_support": 62,
+    "auc_roc": 1.0,
+    "auc_pr": 1.0
+  }
+}

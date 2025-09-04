@@ -1,0 +1,68 @@
+{
+  "framework": "linfa",
+  "language": "rust",
+  "task_type": "classical_ml",
+  "model_name": "linear_regression",
+  "dataset": "synthetic_linear",
+  "run_id": "test_run",
+  "timestamp": "2025-09-03T12:33:32.105700278Z",
+  "hardware_config": {
+    "cpu_model": "AMD Ryzen 9 5900HS with Radeon Graphics",
+    "cpu_cores": 16,
+    "cpu_threads": 16,
+    "memory_gb": 11.386898040771484,
+    "gpu_model": null,
+    "gpu_memory_gb": 0.0,
+    "storage_type": "SSD",
+    "storage_capacity_gb": 1000.0
+  },
+  "performance_metrics": {
+    "training_time_seconds": 0.005963941,
+    "inference_latency_ms": null,
+    "throughput_samples_per_second": null,
+    "convergence_epochs": null,
+    "tokens_per_second": null,
+    "latency_p50_ms": null,
+    "latency_p95_ms": null,
+    "latency_p99_ms": null
+  },
+  "resource_metrics": {
+    "peak_memory_mb": 5238.1796875,
+    "average_memory_mb": 5238.001953125,
+    "peak_gpu_memory_mb": 0.0,
+    "average_gpu_memory_mb": 0.0,
+    "cpu_utilization_percent": 2.911435127258301,
+    "gpu_utilization_percent": 0.0,
+    "energy_consumption_joules": null,
+    "network_io_mb": null
+  },
+  "quality_metrics": {
+    "accuracy": null,
+    "loss": null,
+    "f1_score": null,
+    "precision": null,
+    "recall": null,
+    "rmse": 0.22023539922186672,
+    "mae": 0.177149785004498,
+    "r2_score": -0.001670036589028312,
+    "perplexity": null,
+    "episode_reward": null,
+    "convergence_steps": null,
+    "mape": 1182.9816171138984,
+    "explained_variance": 0.0,
+    "residual_std": 0.22005172865485273,
+    "residual_skew": -0.06643485295240273,
+    "residual_kurtosis": -0.28815032428544374,
+    "mse": 0.048503631070415006
+  },
+  "metadata": {
+    "dataset_size": 1000,
+    "hyperparameters": {},
+    "cv_r2_mean": 0.0,
+    "algorithm": "linear",
+    "cv_r2_std": 0.0,
+    "model_sparsity": 0.0,
+    "n_nonzero_coefficients": 0.0,
+    "features": 20
+  }
+}

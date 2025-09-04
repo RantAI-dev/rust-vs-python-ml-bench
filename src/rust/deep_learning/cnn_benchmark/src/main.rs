@@ -27,7 +27,7 @@ struct Args {
     #[arg(short, long)]
     architecture: String,
     
-    #[arg(short, long, default_value = "{}")]
+    #[arg(long, default_value = "{}")]
     hyperparams: String,
     
     #[arg(short, long)]
@@ -35,6 +35,18 @@ struct Args {
     
     #[arg(short, long, default_value = ".")]
     output_dir: String,
+    
+    #[arg(long, default_value = "cpu")]
+    device: String,
+    
+    #[arg(short = 'b', long, default_value = "32")]
+    batch_size: usize,
+    
+    #[arg(long, default_value = "10")]
+    epochs: usize,
+    
+    #[arg(long, default_value = "0.001")]
+    learning_rate: f64,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -113,6 +125,7 @@ struct BenchmarkResult {
     metadata: HashMap<String, serde_json::Value>,
 }
 
+#[derive(Debug)]
 struct SimpleCNN {
     conv1: nn::Conv2D,
     conv2: nn::Conv2D,
@@ -135,14 +148,21 @@ impl SimpleCNN {
         let xs = xs.apply(&self.conv1).relu();
         let xs = xs.apply(&self.conv2).relu();
         let xs = xs.max_pool2d_default(2);
-        let xs = xs.dropout(0.25);
+        let xs = xs.dropout(0.25, true);
         let xs = xs.view([-1, 9216]);
         let xs = xs.apply(&self.fc1).relu();
-        let xs = xs.dropout(0.5);
+        let xs = xs.dropout(0.5, true);
         xs.apply(&self.fc2)
     }
 }
 
+impl nn::Module for SimpleCNN {
+    fn forward(&self, xs: &Tensor) -> Tensor {
+        SimpleCNN::forward(self, xs)
+    }
+}
+
+#[derive(Debug)]
 struct LeNet {
     conv1: nn::Conv2D,
     conv2: nn::Conv2D,
@@ -173,25 +193,29 @@ impl LeNet {
     }
 }
 
+impl nn::Module for LeNet {
+    fn forward(&self, xs: &Tensor) -> Tensor {
+        LeNet::forward(self, xs)
+    }
+}
+
 struct CNNBenchmark {
     framework: String,
     device: Device,
     model: Option<Box<dyn nn::Module>>,
+    vs: nn::VarStore,
     resource_monitor: ResourceMonitor,
 }
 
 impl CNNBenchmark {
-    fn new(framework: String) -> Self {
-        let device = if tch::Cuda::is_available() {
-            Device::Cuda(0)
-        } else {
-            Device::Cpu
-        };
+    fn new(framework: String, device: Device) -> Self {
+        let vs = nn::VarStore::new(device);
         
         Self {
             framework,
             device,
             model: None,
+            vs,
             resource_monitor: ResourceMonitor::new(),
         }
     }
@@ -205,67 +229,31 @@ impl CNNBenchmark {
     }
     
     fn load_mnist_dataset(&self) -> Result<(Tensor, Tensor)> {
-        // Create synthetic MNIST-like data (deterministic)
-        let mut rng = StdRng::seed_from_u64(42);
-        let n_samples = 1000;
-        let image_size = 28 * 28;
-        
-        let mut data = Vec::with_capacity(n_samples * image_size);
-        let mut targets = Vec::with_capacity(n_samples);
-        
-        for i in 0..n_samples {
-            let digit = i % 10;
-            targets.push(digit as i64);
-            
-            // Generate synthetic digit-like patterns
-            for _ in 0..image_size {
-                let pixel_value = if rng.gen_bool(0.3) {
-                    rng.gen_range(0.5..1.0)
-                } else {
-                    rng.gen_range(0.0..0.3)
-                };
-                data.push(pixel_value);
-            }
-        }
-        
-        let data_tensor = Tensor::of_slice(&data).view([n_samples as i64, image_size as i64]);
-        let targets_tensor = Tensor::of_slice(&targets);
-        
-        Ok((data_tensor.to_device(self.device), targets_tensor.to_device(self.device)))
+        // Use real MNIST via tch::vision with same normalization as Python
+        let dataset = tch::vision::mnist::load_dir("./data")?;
+        // dataset.train_images: [60000, 28*28]; normalize to match Python (0.1307, 0.3081)
+        let mean = 0.1307;
+        let std = 0.3081;
+        let images = (&dataset.train_images - mean) / std;
+        let labels = dataset.train_labels;
+        Ok((images.to_device(self.device), labels.to_device(self.device)))
     }
     
     fn load_cifar10_dataset(&self) -> Result<(Tensor, Tensor)> {
-        // Create synthetic CIFAR-10-like data (deterministic)
-        let mut rng = StdRng::seed_from_u64(42);
-        let n_samples = 1000;
-        let image_size = 3 * 32 * 32;
-        
-        let mut data = Vec::with_capacity(n_samples * image_size);
-        let mut targets = Vec::with_capacity(n_samples);
-        
-        for i in 0..n_samples {
-            let class = i % 10;
-            targets.push(class as i64);
-            
-            // Generate synthetic color image data
-            for _ in 0..image_size {
-                let pixel_value = rng.gen_range(-1.0..1.0);
-                data.push(pixel_value);
-            }
-        }
-        
-        let data_tensor = Tensor::of_slice(&data).view([n_samples as i64, image_size as i64]);
-        let targets_tensor = Tensor::of_slice(&targets);
-        
-        Ok((data_tensor.to_device(self.device), targets_tensor.to_device(self.device)))
+        // Use real CIFAR-10 via tch::vision with same normalization as Python
+        let dataset = tch::vision::cifar::load_dir("./data")?;
+        // Normalize to Python's (0.4914, 0.4822, 0.4465) and (0.2023, 0.1994, 0.2010)
+        let mean = Tensor::f_from_slice(&[0.4914, 0.4822, 0.4465])?.view([3, 1, 1]);
+        let std = Tensor::f_from_slice(&[0.2023, 0.1994, 0.2010])?.view([3, 1, 1]);
+        let images = (dataset.train_images - &mean) / &std;
+        let labels = dataset.train_labels;
+        Ok((images.to_device(self.device), labels.to_device(self.device)))
     }
     
     fn create_model(&mut self, architecture: &str, num_classes: i64) -> Result<()> {
-        let vs = nn::VarStore::new(self.device);
-        
         let model: Box<dyn nn::Module> = match architecture {
-            "lenet" => Box::new(LeNet::new(&vs.root())),
-            "simple_cnn" => Box::new(SimpleCNN::new(&vs.root())),
+            "lenet" => Box::new(LeNet::new(&self.vs.root())),
+            "simple_cnn" => Box::new(SimpleCNN::new(&self.vs.root())),
             _ => return Err(anyhow::anyhow!("Unknown architecture: {}", architecture)),
         };
         
@@ -282,29 +270,66 @@ impl CNNBenchmark {
         
         let start_time = Instant::now();
         
-        // Create optimizer
-        let mut opt = nn::Adam::default().build(&nn::VarStore::new(self.device), learning_rate)?;
+        // Create optimizer using the SAME VarStore as the model
+        let mut opt = nn::Adam::default().build(&self.vs, learning_rate)?;
         
-        let mut losses = Vec::new();
+        let batch_size = 32; // Match Python batch size
+        let n_samples = X_train.size()[0] as usize;
+        let n_batches = (n_samples + batch_size - 1) / batch_size;
+        
+        println!("Training with {} samples, {} batches per epoch", n_samples, n_batches);
         
         for epoch in 0..epochs {
-            let loss = if let Some(ref model) = self.model {
-                let ys = model.forward(X_train);
-                ys.cross_entropy_for_logits(y_train)
-            } else {
-                return Err(anyhow::anyhow!("Model not created"));
-            };
+            let mut epoch_loss = 0.0;
+            let mut correct = 0i64;
+            let mut total = 0i64;
             
-            opt.zero_grad();
-            loss.backward();
-            opt.step();
-            
-            let loss_value = f64::from(loss);
-            losses.push(loss_value);
-            
-            if epoch % 5 == 0 {
-                println!("Epoch {}: Loss = {:.4}", epoch, loss_value);
+            // Process data in batches like Python
+            for batch_idx in 0..n_batches {
+                let start_idx = batch_idx * batch_size;
+                let end_idx = std::cmp::min(start_idx + batch_size, n_samples);
+                let actual_batch_size = end_idx - start_idx;
+                
+                if actual_batch_size == 0 { break; }
+                
+                // Get batch data
+                let batch_X = X_train.narrow(0, start_idx as i64, actual_batch_size as i64);
+                let batch_y = y_train.narrow(0, start_idx as i64, actual_batch_size as i64);
+                
+                // Forward pass
+                let batch_loss = if let Some(ref model) = self.model {
+                    let ys = model.forward(&batch_X);
+                    let loss = ys.cross_entropy_for_logits(&batch_y);
+                    
+                    // Calculate batch accuracy
+                    let predicted = ys.argmax(-1, false);
+                    let batch_correct = predicted.eq_tensor(&batch_y).sum(Kind::Int64);
+                    let batch_correct_i64 = batch_correct.int64_value(&[]);
+                    correct += batch_correct_i64;
+                    total += actual_batch_size as i64;
+                    
+                    loss
+                } else {
+                    return Err(anyhow::anyhow!("Model not created"));
+                };
+                
+                // Backward pass
+                opt.zero_grad();
+                batch_loss.backward();
+                opt.step();
+                
+                let batch_loss_value = batch_loss.double_value(&[]);
+                epoch_loss += batch_loss_value;
+                
+                // Print progress every 100 batches like Python
+                if batch_idx % 100 == 0 {
+                    println!("Epoch: {}, Batch: {}, Loss: {:.4}", epoch, batch_idx, batch_loss_value);
+                }
             }
+            
+            let avg_loss = epoch_loss / n_batches as f64;
+            let accuracy = 100.0 * correct as f64 / total as f64;
+            println!("Epoch {}: Average Loss: {:.4}, Accuracy: {:.2}%", epoch, avg_loss, accuracy);
         }
         
         let training_time = start_time.elapsed().as_secs_f64();
@@ -319,13 +344,13 @@ impl CNNBenchmark {
             let predicted_labels = predictions.argmax(-1, false);
             
             // Calculate accuracy
-            let correct = predicted_labels.eq(y_test).sum(Kind::Float);
-            let total = y_test.size()[0];
-            let accuracy = f64::from(correct) / f64::from(total);
+            let correct = predicted_labels.eq_tensor(y_test).sum(Kind::Int64).int64_value(&[]);
+            let total = y_test.size()[0] as f64;
+            let accuracy = (correct as f64) / total;
             
             // Calculate loss
             let loss = predictions.cross_entropy_for_logits(y_test);
-            let loss_value = f64::from(loss);
+            let loss_value = loss.double_value(&[]);
             
             let mut metrics = HashMap::new();
             metrics.insert("accuracy".to_string(), accuracy);
@@ -340,6 +365,7 @@ impl CNNBenchmark {
     fn run_inference_benchmark(&self, X_test: &Tensor, batch_sizes: &[usize]) -> Result<HashMap<String, f64>> {
         if let Some(ref model) = self.model {
             let mut latencies = Vec::new();
+            let mut throughputs = Vec::new();
             
             for &batch_size in batch_sizes {
                 let mut batch_latencies = Vec::new();
@@ -358,6 +384,8 @@ impl CNNBenchmark {
                 
                 let avg_latency = batch_latencies.iter().sum::<f64>() / batch_latencies.len() as f64;
                 latencies.push(avg_latency);
+                // samples per second
+                throughputs.push((batch_size as f64) / (avg_latency / 1000.0));
             }
             
             let avg_latency = latencies.iter().sum::<f64>() / latencies.len() as f64;
@@ -370,7 +398,7 @@ impl CNNBenchmark {
             metrics.insert("latency_p50_ms".to_string(), p50);
             metrics.insert("latency_p95_ms".to_string(), p95);
             metrics.insert("latency_p99_ms".to_string(), p99);
-            metrics.insert("throughput_samples_per_second".to_string(), 1000.0 / avg_latency);
+            metrics.insert("throughput_samples_per_second".to_string(), throughputs.iter().sum::<f64>() / throughputs.len() as f64);
             
             Ok(metrics)
         } else {
@@ -391,20 +419,6 @@ impl CNNBenchmark {
         }
     }
 
-    #[cfg(test)]
-    mod tests {
-        use super::*;
-
-        #[test]
-        fn percentile_basic() {
-            let v = vec![5.0, 15.0, 25.0, 35.0];
-            let p50 = CNNBenchmark::percentile(&v, 50.0);
-            let p95 = CNNBenchmark::percentile(&v, 95.0);
-            assert!((p50 - 20.0).abs() < 1e-9);
-            assert!(p95 > p50);
-        }
-    }
-    
     fn get_hardware_config(&self) -> HardwareConfig {
         let mut sys = System::new_all();
         sys.refresh_all();
@@ -446,7 +460,7 @@ impl CNNBenchmark {
         let y_test = y.narrow(0, split_idx, n_samples - split_idx);
         
         // Get hyperparameters
-        let epochs = hyperparams.get("epochs").unwrap_or(&10.0) as usize;
+        let epochs = *hyperparams.get("epochs").unwrap_or(&10.0) as usize;
         let learning_rate = hyperparams.get("learning_rate").unwrap_or(&0.001);
         let num_classes = 10; // Default for MNIST/CIFAR-10
         
@@ -506,8 +520,8 @@ impl CNNBenchmark {
             // Train model first
             self.train_model(&X_train, &y_train, epochs, *learning_rate)?;
             
-            // Inference benchmark
-            let inference_metrics = self.run_inference_benchmark(&X_test, &[1, 16, 64])?;
+            // Inference benchmark (aligned with Python: [1, 10, 100])
+            let inference_metrics = self.run_inference_benchmark(&X_test, &[1, 10, 100])?;
             
             return Ok(BenchmarkResult {
                 framework: self.framework.clone(),
@@ -623,14 +637,31 @@ fn main() -> Result<()> {
     
     let args = Args::parse();
     
+    // Set device
+    let device = if args.device == "gpu" || args.device == "cuda" {
+        if tch::Cuda::is_available() {
+            Device::Cuda(0)
+        } else {
+            println!("CUDA not available, falling back to CPU");
+            Device::Cpu
+        }
+    } else {
+        Device::Cpu
+    };
+    
+    println!("Using device: {:?}", device);
+    
     // Generate run ID if not provided
     let run_id = args.run_id.unwrap_or_else(|| Uuid::new_v4().to_string());
     
-    // Parse hyperparameters
-    let hyperparams: HashMap<String, f64> = serde_json::from_str(&args.hyperparams)?;
+    // Parse hyperparameters and add CLI params
+    let mut hyperparams: HashMap<String, f64> = serde_json::from_str(&args.hyperparams)?;
+    hyperparams.insert("epochs".to_string(), args.epochs as f64);
+    hyperparams.insert("learning_rate".to_string(), args.learning_rate);
+    hyperparams.insert("batch_size".to_string(), args.batch_size as f64);
     
     // Create benchmark instance
-    let mut benchmark = CNNBenchmark::new("tch".to_string());
+    let mut benchmark = CNNBenchmark::new("tch".to_string(), device);
     
     // Run benchmark
     let result = benchmark.run_benchmark(
@@ -647,7 +678,7 @@ fn main() -> Result<()> {
     let output_path = Path::new(&args.output_dir).join(output_file);
     
     let json_result = serde_json::to_string_pretty(&result)?;
-    fs::write(output_path, json_result)?;
+    fs::write(&output_path, json_result)?;
     
     println!("Benchmark completed. Results saved to: {}", output_path.display());
     

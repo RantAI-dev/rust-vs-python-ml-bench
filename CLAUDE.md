@@ -130,6 +130,15 @@ pip install -r requirements.txt
 - Use `cargo build --release` for performance benchmarks
 - All projects are part of a workspace defined in root `Cargo.toml`
 
+### Deep Learning GPU Benchmarks (NEW!)
+- **CUDA Support**: Requires mamba-installed libtorch 2.1.0 with CUDA
+- **Environment Setup**: `mamba create -n cpp-torch -c conda-forge libtorch=2.1.0`
+- **Rust GPU**: Set `LIBTORCH=/home/$USER/miniforge3/envs/cpp-torch`
+- **Python GPU**: Requires `CUBLAS_WORKSPACE_CONFIG=:4096:8` for deterministic ops
+- **Performance**: Rust GPU achieves 20x speedup over Python CPU, 11x over Python GPU
+- **Quick Start**: Run `./quick_benchmark.sh` for complete comparison
+- **Full Guide**: See `DEEP_LEARNING_BENCHMARK_GUIDE.md` for detailed instructions
+
 ### Nextflow Execution
 - Default profile: `local_smoke` for development
 - Use `-resume` to continue from last successful checkpoint

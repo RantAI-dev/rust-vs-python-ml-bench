@@ -89,6 +89,11 @@ class QualityMetrics:
     perplexity: Optional[float] = None
     episode_reward: Optional[float] = None
     convergence_steps: Optional[int] = None
+    # Clustering-specific metrics
+    silhouette_score: Optional[float] = None
+    calinski_harabasz_score: Optional[float] = None
+    davies_bouldin_score: Optional[float] = None
+    inertia: Optional[float] = None
 
 
 @dataclass
