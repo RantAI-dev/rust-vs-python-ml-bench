@@ -30,6 +30,10 @@ Cargo.lock
 results/
 data/
 logs/
+smoke_results_core/
+smoke_results_rnn/
+smoke_results_rust/
+benchmark_results_complete.csv
 
 # IDE
 .vscode/
@@ -40,6 +44,17 @@ logs/
 # OS
 .DS_Store
 Thumbs.db
+*.pin
+
+# Additional generated files
+*.sh
+*.pin
+nextflow
+TODO.md
+CLAUDE*.md
+SPEC_GAPS.md
+DEEP_LEARNING_BENCHMARK_GUIDE.md
+REVIEW.md
 
 # Jupyter
 .ipynb_checkpoints/
